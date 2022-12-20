@@ -19,6 +19,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"github.com/rs/cors"
 )
 
 type GrafanaBoard struct {
@@ -118,6 +119,11 @@ func handleRequests() {
 
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
+	c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"http://localhost:3006"},
+        AllowCredentials: true,
+    })
+    
 	// replace http.HandleFunc with myRouter.HandleFunc
 	myRouter.HandleFunc("/grafana-ds", getDs)
 	myRouter.HandleFunc("/grafana-ds-query", GrafanaQueryHandler)
@@ -126,7 +132,7 @@ func handleRequests() {
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
 	// argument
-	log.Fatal(http.ListenAndServe(":10000", myRouter))
+	log.Fatal(http.ListenAndServe(":10000", c.Handler(myRouter)))
 }
 
 func main() {
