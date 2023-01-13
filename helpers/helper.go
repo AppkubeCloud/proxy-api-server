@@ -122,6 +122,22 @@ func ProcessBoard(g *models.GrafanaClient, ctx context.Context, c *sdk.Client, b
 						grafBoard.Panels = append(grafBoard.Panels, p4)
 					}
 				}
+			} else {
+				if p1.OfType == sdk.TableType && p1.Type == "table" {
+					if p1.Datasource != nil {
+						tempDsStr := fmt.Sprint(p1.Datasource)
+						if strings.HasPrefix(tempDsStr, "$") { // Formating Datasource id
+							p1.Datasource = &models.GrafanaDataSource{
+								Name: tmpDsName[strings.Replace(tempDsStr, "$", "", 1)],
+							}
+
+						}
+						// if strings.HasPrefix(*p1.Datasource, "$") { // Formating Datasource id
+						// 	*p1.Datasource = tmpDsName[strings.Replace(*p1.Datasource, "$", "", 1)]
+						// }
+					}
+					grafBoard.Panels = append(grafBoard.Panels, p1)
+				}
 			}
 		}
 	} else if len(board.Rows) > 0 { //Process Board Rows
