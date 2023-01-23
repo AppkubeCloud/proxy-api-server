@@ -9,6 +9,7 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/text v0.5.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

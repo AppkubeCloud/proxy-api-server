@@ -19,6 +19,9 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path"
+	"path/filepath"
+	"proxy-api-server/config"
 	"proxy-api-server/log"
 	"proxy-api-server/server"
 
@@ -54,22 +57,29 @@ func main() {
 
 	// log startup information
 	//log.Infof("Kiali: Version: %v, Commit: %v\n", version, commitHash)
-	log.Debugf("proxy-api-server: Command line: [%v]", strings.Join(os.Args, " "))
+	log.Infof("Starting server")
+	log.Debugf("Command line: [%v]", strings.Join(os.Args, " "))
+	homePath, err := filepath.Abs(".")
+	if err != nil {
+		log.Fatal("Error in setting home path", err)
+		return
+	}
+	defaultConfigFile := path.Join(homePath, "conf/config.yaml")
 
 	// load config file if specified, otherwise, rely on environment variables to configure us
-	// if *argConfigFile != "" {
-	// 	c, err := config.LoadFromFile(*argConfigFile)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	config.Set(c)
-	// } else {
-	// 	log.Infof("No configuration file specified. Will rely on environment for configuration.")
-	// 	config.Set(config.NewConfig())
-	// }
+	if defaultConfigFile != "" {
+		c, err := config.LoadFromFile(defaultConfigFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		config.Set(c)
+	} else {
+		//log.Infof("No configuration file specified. Will rely on environment for configuration.")
+		//config.Set(config.NewConfig())
+	}
 
-	// cfg := config.Get()
-	// log.Tracef("Kiali Configuration:\n%s", cfg)
+	cfg := config.Get()
+	log.Tracef("proxy-api-server configuration:\n%s", cfg)
 
 	// if err := validateConfig(); err != nil {
 	// 	log.Fatal(err)

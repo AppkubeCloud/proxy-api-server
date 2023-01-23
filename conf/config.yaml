@@ -1,0 +1,6 @@
+server:
+  address: localhost
+  port: 10000
+  static_content_root_directory: /home/userTests/proxy-api-static-files
+  cors_allow_all: false
+  white_list_urls: http://localhost:3002
