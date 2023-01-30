@@ -16,6 +16,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -36,9 +37,9 @@ import (
 // )
 
 // Command line arguments
-// var (
-// 	argConfigFile = flag.String("config", "", "Path to the YAML configuration file. If not specified, environment variables will be used for configuration.")
-// )
+var (
+	argConfigFile = flag.String("config", "", "Path to the YAML configuration file. If not specified, environment variables will be used for configuration.")
+)
 
 // func init() {
 // 	// log everything to stderr so that it can be easily gathered by logs, separate log files are problematic with containers
@@ -52,8 +53,8 @@ func main() {
 	// util.Clock = util.RealClock{}
 
 	// process command line
-	// flag.Parse()
-	// validateFlags()
+	flag.Parse()
+	validateFlags()
 
 	// log startup information
 	//log.Infof("Kiali: Version: %v, Commit: %v\n", version, commitHash)
@@ -66,8 +67,16 @@ func main() {
 	}
 	defaultConfigFile := path.Join(homePath, "conf/config.yaml")
 
-	// load config file if specified, otherwise, rely on environment variables to configure us
-	if defaultConfigFile != "" {
+	// load config file if specified on command prompt
+	if *argConfigFile != "" {
+		log.Infof("Loading config..")
+		c, err := config.LoadFromFile(*argConfigFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		config.Set(c)
+	} else if defaultConfigFile != "" { // if config file not provided from command-line load from default location
+		log.Infof("Loading config from default location..")
 		c, err := config.LoadFromFile(defaultConfigFile)
 		if err != nil {
 			log.Fatal(err)
@@ -192,15 +201,15 @@ func validateConfig() error {
 	return nil
 }
 
-// func validateFlags() {
-// 	if *argConfigFile != "" {
-// 		if _, err := os.Stat(*argConfigFile); err != nil {
-// 			if os.IsNotExist(err) {
-// 				log.Debugf("Configuration file [%v] does not exist.", *argConfigFile)
-// 			}
-// 		}
-// 	}
-// }
+func validateFlags() {
+	if *argConfigFile != "" {
+		if _, err := os.Stat(*argConfigFile); err != nil {
+			if os.IsNotExist(err) {
+				log.Debugf("Configuration file [%v] does not exist.", *argConfigFile)
+			}
+		}
+	}
+}
 
 // determineContainerVersion will return the version of the image container.
 // It does this by looking at an ENV defined in the Dockerfile when the image is built.
