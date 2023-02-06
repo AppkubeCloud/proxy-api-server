@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"proxy-api-server/log"
@@ -139,4 +140,51 @@ func GrafanaQuery(g *models.GrafanaClient, ctx context.Context, BaseURL, APIKey 
 		return nil, errors.New("error getting data from Grafana API")
 	}
 	return data, nil
+}
+
+func GrafanaDsQueryHandler(w http.ResponseWriter, r *http.Request) {
+
+	grafanaUrl := r.URL.Query().Get("grafanaUrl")
+	apiKey := r.URL.Query().Get("apiKey")
+	if grafanaUrl == "" {
+		fmt.Println("Grafana url not provided")
+		return
+	} else if apiKey == "" {
+		fmt.Println("Grafana api key (userId:password) not provided")
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Errorf("Cannot read query json")
+		util.CommonError(err)
+		return
+	}
+	payload := strings.NewReader(string(body))
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", grafanaUrl, payload)
+	if err != nil {
+		fmt.Errorf("Cannot create a post requests")
+		util.CommonError(err)
+		return
+	}
+	req.Header.Add("api-key", apiKey)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		util.CommonError(err)
+		return
+	}
+	defer res.Body.Close()
+
+	resPbody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(resPbody))
+
+	_, _ = w.Write(resPbody)
 }

@@ -85,6 +85,25 @@ func NewRoutes() (r *Routes) {
 			handlers.GrafanaQueryHandler,
 			true,
 		},
+		// swagger:route GET /grafana/dsquery
+		// ---
+		// Endpoint to get the grafana query
+		//
+		//     Produces:
+		//     - application/json
+		//
+		//     Schemes: http, https
+		//
+		// responses:
+		//      500: internalError
+		//      200: statusInfo
+		{
+			"GrafanaQuery",
+			"POST",
+			"/grafana/query",
+			handlers.GrafanaDsQueryHandler,
+			true,
+		},
 		// swagger:route GET /grafana/query-range
 		// ---
 		// Endpoint to get the grafana details by query range
