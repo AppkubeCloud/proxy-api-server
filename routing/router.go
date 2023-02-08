@@ -66,6 +66,25 @@ func NewRoutes() (r *Routes) {
 			handlers.GetGrafanaDashbordByUidHandler,
 			true,
 		},
+		// swagger:route POST /grafana/create-dashboard
+		// ---
+		// Endpoint to create dashboard in grafana
+		//
+		//     Produces:
+		//     - application/json
+		//
+		//     Schemes: http, https
+		//
+		// responses:
+		//      500: internalError
+		//      200: statusInfo
+		{
+			"GrafanaCreateDashboard",
+			"POST",
+			"/grafana/create-dashboard",
+			handlers.GrafanaApiHandler,
+			true,
+		},
 		// swagger:route GET /grafana/query
 		// ---
 		// Endpoint to get the grafana details by query
@@ -85,7 +104,7 @@ func NewRoutes() (r *Routes) {
 			handlers.GrafanaQueryHandler,
 			true,
 		},
-		// swagger:route GET /grafana/dsquery
+		// swagger:route POST /grafana/query
 		// ---
 		// Endpoint to get the grafana query
 		//
@@ -101,7 +120,7 @@ func NewRoutes() (r *Routes) {
 			"GrafanaQuery",
 			"POST",
 			"/grafana/query",
-			handlers.GrafanaDsQueryHandler,
+			handlers.GrafanaApiHandler,
 			true,
 		},
 		// swagger:route GET /grafana/query-range

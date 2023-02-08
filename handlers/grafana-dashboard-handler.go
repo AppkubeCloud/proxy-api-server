@@ -21,9 +21,11 @@ func GetGrafanaDashbordByUidHandler(w http.ResponseWriter, r *http.Request) {
 	uid := r.URL.Query().Get("uid")
 	if grafanaUrl == "" {
 		log.Error("Grafana url not provided")
+		http.Error(w, fmt.Sprintf("Grafana url not provided"), http.StatusBadRequest)
 		return
 	} else if apiKey == "" {
 		log.Error("Grafana api key (userId:password) not provided")
+		http.Error(w, fmt.Sprintf("Grafana api key (userId:password) not provided"), http.StatusBadRequest)
 		return
 	}
 
@@ -37,19 +39,27 @@ func GetGrafanaDashbordByUidHandler(w http.ResponseWriter, r *http.Request) {
 	grafanaSdkClient, err := sdk.NewClient(grafanaUrl, apiKey, client.HttpClient)
 	if err != nil {
 		log.Error("Error in grafana sdk client: ", err)
+		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
 		return
 	}
 
 	br, brProp, err := grafanaSdkClient.GetDashboardByUID(req.Context(), uid)
 	if err != nil {
 		log.Errorf("Error in getting dashboard by UID: %s, Error : %s", uid, err)
+		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
 		return
 	}
 	grafBoard := &models.GrafanaDashboard{
 		Dashboard: &br,
 		Meta:      &brProp,
 	}
-	json.NewEncoder(w).Encode(grafBoard)
+	//json.NewEncoder(w).Encode(grafBoard)
+
+	if err := json.NewEncoder(w).Encode(grafBoard); err != nil {
+		util.Error("Http request failed: ", err)
+		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+		return
+	}
 
 	log.Info("GetGrafanaDashbordByUidHandler completed")
 

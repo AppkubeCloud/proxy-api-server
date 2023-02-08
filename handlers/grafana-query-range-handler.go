@@ -23,8 +23,8 @@ func GrafanaQueryRangeHandler(w http.ResponseWriter, req *http.Request) {
 	client := util.NewGrafanaClient()
 	data, err := GrafanaQueryRange(client, req.Context(), reqQuery.Get("url"), reqQuery.Get("api-key"), &reqQuery)
 	if err != nil {
-		// h.log.Error(ErrGrafanaQuery(err))
-		// http.Error(w, ErrGrafanaQuery(err).Error(), http.StatusInternalServerError)
+		util.Error("Http request failed: ", err)
+		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
 		return
 	}
 	_, _ = w.Write(data)
